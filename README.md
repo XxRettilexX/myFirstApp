@@ -1,50 +1,129 @@
-# Welcome to your Expo app 👋
+# 🍕 Pizzeria ITS - La Tua Prima App in React Native
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+Benvenuto nel progetto **Pizzeria ITS**! Questa è un'applicazione mobile creata come esercitazione per il corso ITS, focalizzata sull'apprendimento dei concetti fondamentali di React Native e della navigazione mobile.
 
-## Get started
+![React Native Logo](https://raw.githubusercontent.com/xxrettilexx/myfirstapp/main/assets/images/react-logo.png)
 
-1. Install dependencies
+---
 
-   ```bash
-   npm install
-   ```
+## ✨ Funzionalità Principali
 
-2. Start the app
+L'applicazione simula un flusso utente semplice ma completo per una pizzeria:
 
-   ```bash
-   npx expo start
-   ```
+-   👤 **Flusso di Autenticazione**: Una schermata di `Login` che protegge l'accesso all'area principale dell'app.
+-   📚 **Navigazione a Stack**: Gestisce la navigazione gerarchica tra le schermate, ad esempio dalla lista prodotti al dettaglio.
+-   📱 **Navigazione a Schede (Tabs)**: Una `Bottom Tab Bar` per muoversi tra le sezioni principali: `Home`, `Ordini` e `Profilo`.
+-   ➡️ **Passaggio di Parametri**: Abilità di inviare dati da una schermata all'altra (es. ID e nome della pizza).
+-   🔐 **Gestione della Sessione**: Utilizzo del `reset` dello stack di navigazione per un'esperienza di login/logout sicura e senza interruzioni.
 
-In the output, you'll find options to open the app in a
+---
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+## 🛠️ Architettura e Concetti Chiave
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+Il progetto è stato costruito seguendo fedelmente le lezioni del corso, in particolare l'architettura manuale di **React Navigation** come spiegato nelle slide del "Giorno 3".
 
-## Get a fresh project
+### Struttura della Navigazione
 
-When you're ready, run:
+L'app è avvolta da un `NavigationContainer` che gestisce due navigatori principali annidati:
 
-```bash
-npm run reset-project
+1.  **`RootStack` (StackNavigator)**: Gestisce il flusso principale.
+    -   `Login`: Schermata iniziale.
+    -   `MainTabs`: Un'unica schermata che contiene al suo interno il Tab Navigator.
+    -   `PizzaDetails`: Schermata di dettaglio accessibile dall'app.
+
+    ```tsx
+    // navigation/RootStack.tsx
+    export type RootStackParamList = {
+      Login: undefined;
+      MainTabs: undefined;
+      PizzaDetails: { id: string; name: string };
+    };
+
+    const Stack = createNativeStackNavigator<RootStackParamList>();
+
+    export default function RootStack() {
+      return (
+        <Stack.Navigator>
+          <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
+          <Stack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
+          <Stack.Screen name="PizzaDetails" component={PizzaDetailsScreen} />
+        </Stack.Navigator>
+      );
+    }
+    ```
+
+2.  **`MainTabs` (TabNavigator)**: Gestisce le schede principali.
+    -   `Home`: Mostra il menu.
+    -   `Orders`: Mostra gli ordini.
+    -   `Profile`: Contiene il pulsante di logout.
+
+    ```tsx
+    // navigation/MainTabs.tsx
+    const Tab = createBottomTabNavigator<TabsParamList>();
+
+    export default function MainTabs() {
+      return (
+        <Tab.Navigator /* ... */ >
+          <Tab.Screen name="Home" component={HomeScreen} />
+          <Tab.Screen name="Orders" component={OrdersScreen} />
+          <Tab.Screen name="Profile" component={ProfileScreen} />
+        </Tab.Navigator>
+      );
+    }
+    ```
+
+### Gestione del Flusso di Login/Logout
+
+Per garantire che l'utente non possa tornare alla schermata di login dopo essersi autenticato (e viceversa), utilizziamo l'azione `reset` della navigazione.
+
+```tsx
+// screens/LoginScreen.tsx -> Al login
+navigation.reset({
+  index: 0,
+  routes: [{ name: 'MainTabs' }],
+});
+
+// screens/ProfileScreen.tsx -> Al logout
+navigation.dispatch(
+  CommonActions.reset({
+    index: 0,
+    routes: [{ name: 'Login' }],
+  })
+);
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+---
 
-## Learn more
+## 🚀 Come Avviare il Progetto
 
-To learn more about developing your project with Expo, look at the following resources:
+Segui questi passaggi per eseguire l'app in locale.
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+1.  **Clona il Repository**
+    ```bash
+    git clone [https://github.com/tuo-username/myfirstapp.git](https://github.com/tuo-username/myfirstapp.git)
+    cd myfirstapp
+    ```
 
-## Join the community
+2.  **Installa le Dipendenze**
+    Assicurati di avere Node.js installato, poi esegui:
+    ```bash
+    npm install
+    ```
 
-Join our community of developers creating universal apps.
+3.  **Avvia Expo**
+    ```bash
+    npx expo start
+    ```
+    -   Scansiona il QR code con l'app **Expo Go** sul tuo smartphone (iOS o Android).
+    -   Oppure, premi `a` per aprire in un emulatore Android o `i` per un simulatore iOS.
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+---
+
+## 💻 Stack Tecnologico
+
+-   **Framework**: React Native con Expo
+-   **Linguaggio**: TypeScript
+-   **Navigazione**: React Navigation (`@react-navigation/native-stack`, `@react-navigation/bottom-tabs`)
+-   **Icone**: `@expo/vector-icons`
+
+Fatto con ❤️ durante il corso ITS.
