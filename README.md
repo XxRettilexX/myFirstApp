@@ -100,7 +100,7 @@ Segui questi passaggi per eseguire l'app in locale.
 
 1.  **Clona il Repository**
     ```bash
-    git clone [https://github.com/tuo-username/myfirstapp.git](https://github.com/tuo-username/myfirstapp.git)
+    git clone [https://github.com/XxRettilexX/myFirstApp.git](https://github.com/XxRettilexX/myFirstApp.git)
     cd myfirstapp
     ```
 
