@@ -1,62 +1,46 @@
+// app/(tabs)/index.tsx
+
 import { ThemedText } from '@/components/themed-text';
 import { ThemedView } from '@/components/themed-view';
-import { ScrollView, StyleSheet, View } from 'react-native';
-
-// Importa i nuovi componenti degli esercizi
-import { CustomButton } from '../../components/exercices/CustomButton';
-import { LoginScreen } from '../../components/exercices/LoginScreen';
-import { SearchBar } from '../../components/exercices/SearchBar';
-import { ThreeCards } from '../../components/exercices/ThreeCards';
+import { Link } from 'expo-router';
+import { Pressable, StyleSheet } from 'react-native';
 
 export default function HomeScreen() {
   return (
-    <ScrollView style={styles.container}>
-      <ThemedView style={styles.mainContent}>
-        <ThemedText type="title" style={styles.mainTitle}>
-          Esercizi in Componenti
-        </ThemedText>
+    <ThemedView style={styles.container}>
+      <ThemedText type="title">Menu Pizze</ThemedText>
 
-        {/* Esercizio 1 */}
-        <View style={styles.exerciseContainer}>
-          <ThemedText type="subtitle">1. Tre Card</ThemedText>
-          <ThreeCards />
-        </View>
+      <Link
+        href={{
+          pathname: "/pizzadetails",
+          params: { id: 'marg-001', name: 'Margherita' }
+        }}
+        asChild
+      >
+        <Pressable style={styles.pizzaButton}>
+          <ThemedText style={styles.pizzaText}>Vai ai dettagli della Margherita</ThemedText>
+        </Pressable>
+      </Link>
 
-        {/* Esercizio 2 */}
-        <View style={styles.exerciseContainer}>
-          <ThemedText type="subtitle">2. Barra di Ricerca</ThemedText>
-          <SearchBar />
-        </View>
-
-        {/* Esercizio 3 */}
-        <View style={styles.exerciseContainer}>
-          <ThemedText type="subtitle">3. Pulsante Pressable</ThemedText>
-          <CustomButton />
-        </View>
-
-        {/* Esercizio 4 */}
-        <View style={styles.exerciseContainer}>
-          <ThemedText type="subtitle">4. Form di Login</ThemedText>
-          <LoginScreen />
-        </View>
-      </ThemedView>
-    </ScrollView>
+    </ThemedView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    gap: 16,
   },
-  mainContent: {
-    padding: 24,
-    gap: 24, // Aggiunge spazio tra le sezioni degli esercizi
+  pizzaButton: {
+    backgroundColor: '#0a7ea4',
+    padding: 14,
+    borderRadius: 8,
   },
-  mainTitle: {
-    textAlign: 'center',
-    marginBottom: 16,
-  },
-  exerciseContainer: {
-    gap: 12, // Aggiunge spazio tra il titolo dell'esercizio e il componente
-  },
+  pizzaText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: 'bold',
+  }
 });
