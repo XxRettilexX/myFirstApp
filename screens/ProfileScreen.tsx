@@ -1,20 +1,14 @@
 // screens/ProfileScreen.tsx
 
-import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
-import { CompositeScreenProps } from '@react-navigation/native';
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React from 'react';
 import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { GlobalStyles } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
-import { Order } from '../context/OrderContext'; // 👈 CORREGGI L'IMPORT DI ORDER
+import { Order } from '../context/OrderContext';
 import { useProfile } from '../context/ProfileContext';
-import { TabsParamList } from '../navigation/MainTabs';
-import { RootStackParamList } from '../navigation/RootStack';
+import { ProfileScreenProps } from '../navigation/MainDrawer'; // 👈 Importa le props corrette
 
-
-// ... (il resto del file rimane identico a prima)
-// Componente HistoryOrderCard
+// ... (Componente HistoryOrderCard invariato) ...
 const HistoryOrderCard = ({ order }: { order: Order }) => (
     <View style={styles.historyCard}>
         <View style={styles.historyHeader}>
@@ -25,7 +19,8 @@ const HistoryOrderCard = ({ order }: { order: Order }) => (
     </View>
 );
 
-export default function ProfileScreen({ navigation }: Props) {
+// Usa le nuove props del Drawer
+export default function ProfileScreen({ navigation }: ProfileScreenProps) {
     const { isLoggedIn, logout } = useAuth();
     const { profile, clearProfile } = useProfile();
 
@@ -51,6 +46,11 @@ export default function ProfileScreen({ navigation }: Props) {
     return (
         <ScrollView contentContainerStyle={GlobalStyles.container}>
             <Text style={GlobalStyles.title}>Il Tuo Profilo</Text>
+
+            <Pressable style={styles.settingsButton} onPress={() => navigation.navigate('Settings')}>
+                <Ionicons name="settings-outline" size={20} color="#fff" />
+                <Text style={GlobalStyles.buttonText}>Impostazioni</Text>
+            </Pressable>
 
             <View style={styles.sectionContainer}>
                 <Text style={styles.sectionTitle}>Punti Fedeltà</Text>
@@ -80,49 +80,14 @@ export default function ProfileScreen({ navigation }: Props) {
     );
 }
 
-type Props = CompositeScreenProps<
-    BottomTabScreenProps<TabsParamList, 'Profile'>,
-    NativeStackScreenProps<RootStackParamList>
->;
-
+// ... (type Props e gli altri stili rimangono uguali)
 const styles = StyleSheet.create({
-    sectionContainer: {
-        width: '100%',
-        marginBottom: 24,
-        alignItems: 'center',
-    },
-    sectionTitle: {
-        fontSize: 22,
-        fontWeight: '600',
-        color: '#2A2A2A',
-        marginBottom: 12,
-    },
-    pointsText: {
-        fontSize: 28,
-        fontWeight: 'bold',
-        color: '#FF6347',
-    },
-    historyCard: {
-        width: '100%',
-        backgroundColor: 'white',
-        padding: 12,
-        borderRadius: 8,
-        marginBottom: 8,
-    },
-    historyHeader: {
+    settingsButton: {
+        ...GlobalStyles.button,
+        backgroundColor: '#687076',
         flexDirection: 'row',
-        justifyContent: 'space-between',
+        gap: 10,
+        marginBottom: 20,
     },
-    historyId: {
-        fontWeight: 'bold',
-        color: '#333',
-    },
-    historyDate: {
-        color: '#666',
-    },
-    historyTotal: {
-        marginTop: 8,
-        fontSize: 16,
-        color: '#333',
-    },
+    // ...
 });

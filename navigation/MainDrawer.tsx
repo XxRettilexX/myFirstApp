@@ -1,75 +1,60 @@
-// navigation/MainTabs.tsx
+// navigation/MainDrawer.tsx
 
 import { Ionicons } from '@expo/vector-icons';
-import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
+import { BottomTabScreenProps, createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import { createDrawerNavigator, DrawerScreenProps } from '@react-navigation/drawer';
 import { CompositeScreenProps, useNavigation } from '@react-navigation/native';
+import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React from 'react';
 import { Pressable } from 'react-native';
 
-import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import { useAuth } from '../context/AuthContext';
 import CartScreen from '../screens/CartScreen';
 import HomeScreen from '../screens/HomeScreen';
 import OrdersScreen from '../screens/OrdersScreen';
 import ProfileScreen from '../screens/ProfileScreen';
-import SettingsScreen from '../screens/SettingsScreen';
 import { RootStackParamList } from './RootStack';
 
-// --- 1. TIPI PER IL DRAWER NAVIGATOR ---
-export type DrawerParamList = {
-    Menu: undefined;
-    Impostazioni: undefined;
+
+export type TabParamList = {
+    Home: undefined;
+    Orders: undefined;
+    Cart: undefined;
 };
 
-// Definiamo le props per le schermate del Drawer
-export type HomeDrawerScreenProps = CompositeScreenProps<
-    DrawerScreenProps<DrawerParamList, 'Menu'>,
+
+export type DrawerParamList = {
+    Pizzeria: undefined; // Questa rotta conterrà il Tab Navigator
+    Profile: undefined;
+};
+
+// Tipi compositi per le props delle schermate
+export type HomeScreenProps = CompositeScreenProps<
+    BottomTabScreenProps<TabParamList, 'Home'>,
+    DrawerScreenProps<DrawerParamList> & NativeStackScreenProps<RootStackParamList>
+>;
+
+export type ProfileScreenProps = CompositeScreenProps<
+    DrawerScreenProps<DrawerParamList, 'Profile'>,
     NativeStackScreenProps<RootStackParamList>
 >;
 
 
-// --- 2. DRAWER NAVIGATOR (Menu Laterale) ---
-const Drawer = createDrawerNavigator<DrawerParamList>();
+// --- COMPONENTE TAB NAVIGATOR ---
+const Tab = createBottomTabNavigator<TabParamList>();
 
-function HomeDrawerNavigator() {
-    return (
-        <Drawer.Navigator screenOptions={{ headerTitle: "Bella Pizza" }}>
-            {/* Il nome della rotta 'Menu' corrisponde a quello in DrawerParamList */}
-            <Drawer.Screen name="Menu" component={HomeScreen} />
-            <Drawer.Screen name="Impostazioni" component={SettingsScreen} />
-        </Drawer.Navigator>
-    );
-}
-
-// --- 3. TAB NAVIGATOR (Barra in Basso) ---
-export type TabsParamList = {
-    Home: undefined;
-    Orders: undefined;
-    Cart: undefined;
-    Profile: undefined;
-};
-
-const Tab = createBottomTabNavigator<TabsParamList>();
-
-export default function MainTabs() {
+function TabNavigator() {
     const { isLoggedIn } = useAuth();
-    const rootNavigation = useNavigation();
+    const navigation = useNavigation();
 
     return (
         <Tab.Navigator
-            screenOptions={({ route, navigation }) => ({
-                // Nasconde l'header del Tab per "Home" per mostrare quello del Drawer
-                headerShown: route.name !== 'Home',
+            screenOptions={({ route }) => ({
                 headerTitleAlign: 'center',
-
                 headerRight: () => {
                     if (route.name === 'Cart') return null;
                     return (
-                        <Pressable
-                            onPress={() => navigation.navigate('Cart')} // Usa la navigation del Tab
-                            style={{ marginRight: 15 }}
-                        >
+                        <Pressable onPress={() => navigation.navigate('Cart' as never)} style={{ marginRight: 15 }}>
                             <Ionicons name="cart" size={24} color="#FF6347" />
                         </Pressable>
                     );
@@ -79,16 +64,11 @@ export default function MainTabs() {
                     if (route.name === 'Home') iconName = focused ? 'home' : 'home-outline';
                     if (route.name === 'Orders') iconName = focused ? 'receipt' : 'receipt-outline';
                     if (route.name === 'Cart') iconName = focused ? 'cart' : 'cart-outline';
-                    if (route.name === 'Profile') iconName = focused ? 'person' : 'person-outline';
                     return <Ionicons name={iconName} size={size} color={color} />;
                 },
             })}
         >
-            <Tab.Screen
-                name="Home"
-                component={HomeDrawerNavigator}
-                options={{ title: 'Menu' }}
-            />
+            <Tab.Screen name="Home" component={HomeScreen} options={{ title: 'Menu' }} />
             <Tab.Screen
                 name="Orders"
                 component={OrdersScreen}
@@ -97,13 +77,33 @@ export default function MainTabs() {
                     tabPress: (e) => {
                         if (!isLoggedIn) {
                             e.preventDefault();
-                            rootNavigation.navigate('Login' as never);
+                            navigation.navigate('Login' as never);
                         }
                     },
                 }}
             />
             <Tab.Screen name="Cart" component={CartScreen} options={{ title: 'Carrello' }} />
-            <Tab.Screen name="Profile" component={ProfileScreen} options={{ title: 'Profilo' }} />
         </Tab.Navigator>
+    );
+}
+
+
+// --- COMPONENTE DRAWER NAVIGATOR (PRINCIPALE) ---
+const Drawer = createDrawerNavigator<DrawerParamList>();
+
+export default function MainDrawerNavigator() {
+    return (
+        <Drawer.Navigator>
+            <Drawer.Screen
+                name="Pizzeria"
+                component={TabNavigator}
+                options={{ title: 'Bella Pizza', headerShown: false }}
+            />
+            <Drawer.Screen
+                name="Profile"
+                component={ProfileScreen}
+                options={{ title: 'Il Mio Profilo' }}
+            />
+        </Drawer.Navigator>
     );
 }
