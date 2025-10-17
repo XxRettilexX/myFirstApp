@@ -1,28 +1,31 @@
 // navigation/RootStack.tsx
 
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-// ...altri import...
+import AddressModal from '../screens/AddressModal'; // 👈 IMPORTA LA MODALE
 import LoginScreen from '../screens/LoginScreen';
 import PizzaDetailsScreen from '../screens/PizzaDetailsScreen';
 import MainTabs from './MainTabs';
 
-
 export type RootStackParamList = {
-    Login: undefined;
     MainTabs: undefined;
+    Login: undefined;
     PizzaDetails: { id: string; name: string };
+    AddressModal: undefined;
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
 
 export default function RootStack() {
     return (
-        // 👇 Imposta la rotta iniziale sulle schede principali
         <Stack.Navigator initialRouteName="MainTabs">
             <Stack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
-            {/* La schermata di Login ora è presentata come modale per un effetto migliore */}
-            <Stack.Screen name="Login" component={LoginScreen} options={{ presentation: 'modal', title: 'Accedi o Registrati' }} />
             <Stack.Screen name="PizzaDetails" component={PizzaDetailsScreen} />
+
+
+            <Stack.Group screenOptions={{ presentation: 'modal' }}>
+                <Stack.Screen name="Login" component={LoginScreen} options={{ title: 'Accedi o Registrati' }} />
+                <Stack.Screen name="AddressModal" component={AddressModal} options={{ title: 'Nuovo Indirizzo' }} />
+            </Stack.Group>
         </Stack.Navigator>
     );
 }

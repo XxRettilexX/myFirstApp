@@ -4,13 +4,14 @@ import { BottomTabScreenProps } from '@react-navigation/bottom-tabs';
 import { CompositeScreenProps } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React from 'react';
-import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native'; // 👈 IMPORTA ALERT
+import { Alert, Pressable, ScrollView, StyleSheet, Text, View } from 'react-native';
 import { GlobalStyles } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
 import { Order } from '../context/OrderContext'; // 👈 CORREGGI L'IMPORT DI ORDER
 import { useProfile } from '../context/ProfileContext';
 import { TabsParamList } from '../navigation/MainTabs';
 import { RootStackParamList } from '../navigation/RootStack';
+
 
 // ... (il resto del file rimane identico a prima)
 // Componente HistoryOrderCard

@@ -4,7 +4,7 @@ import React, { createContext, ReactNode, useContext, useState } from 'react';
 import { useAuth } from './AuthContext';
 import { Order } from './OrderContext';
 
-// 👇 ESPORTA L'INTERFACCIA PER RENDERLA DISPONIBILE ALL'ESTERNO
+// 👇 Esportiamo l'interfaccia
 export interface UserProfile {
     points: number;
     orderHistory: Order[];
@@ -13,7 +13,7 @@ export interface UserProfile {
 interface ProfileContextType {
     profile: UserProfile;
     addPaidOrder: (order: Order) => void;
-    clearProfile: () => void; // 👈 AGGIUNGI QUI LA FUNZIONE MANCANTE
+    clearProfile: () => void; // 👈 Aggiungiamo la funzione al tipo
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);

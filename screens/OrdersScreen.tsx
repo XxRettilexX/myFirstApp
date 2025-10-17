@@ -1,45 +1,38 @@
 // screens/OrdersScreen.tsx
 
-import React from 'react';
+import { useFocusEffect } from '@react-navigation/native';
+import React, { useCallback } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GlobalStyles } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
 import { Order, useOrders } from '../context/OrderContext';
 import { useProfile } from '../context/ProfileContext';
 
-// ====================================================================
-// Componente Card per un singolo ordine da pagare
-// ====================================================================
+// Componente per la card di un singolo ordine
 const OrderCard = ({ order }: { order: Order }) => {
     const { removeOrder } = useOrders();
     const { addPaidOrder } = useProfile();
     const { isLoggedIn } = useAuth();
 
     const handlePayment = () => {
-        // 1. Sposta l'ordine nello storico del profilo (e calcola i punti se loggato)
         addPaidOrder(order);
-
-        // 2. Rimuovi l'ordine dalla lista di quelli "da pagare"
         removeOrder(order.id);
 
-        // 3. Mostra una conferma di pagamento con un messaggio dinamico
         const pointsEarned = Math.floor(order.total);
         const confirmationMessage = isLoggedIn
             ? `Grazie! Hai guadagnato ${pointsEarned} punti fedeltà.`
-            : `Grazie per il tuo ordine! Accedi al tuo profilo per accumulare punti in futuro.`;
+            : `Grazie per il tuo ordine! Accedi per accumulare punti in futuro.`;
 
         Alert.alert("Pagamento Effettuato", confirmationMessage);
     };
 
     return (
         <View style={styles.orderContainer}>
-            {/* Intestazione con ID e Data */}
             <View style={styles.orderHeader}>
                 <Text style={styles.orderId}>Ordine #{order.id.slice(-5)}</Text>
                 <Text style={styles.orderDate}>{order.date.toLocaleDateString('it-IT')}</Text>
             </View>
 
-            {/* Lista degli articoli nell'ordine */}
             {order.items.map(item => (
                 <View key={item.id} style={styles.itemContainer}>
                     <Text style={styles.itemName}>{item.name} (x{item.quantity})</Text>
@@ -47,7 +40,6 @@ const OrderCard = ({ order }: { order: Order }) => {
                 </View>
             ))}
 
-            {/* Riepilogo finale con totale e pulsante Paga */}
             <View style={styles.totalContainer}>
                 <Text style={styles.totalText}>Totale: €{order.total.toFixed(2)}</Text>
                 <Pressable style={styles.payButton} onPress={handlePayment}>
@@ -58,11 +50,18 @@ const OrderCard = ({ order }: { order: Order }) => {
     );
 };
 
-// ====================================================================
-// Schermata principale che mostra la lista degli ordini in sospeso
-// ====================================================================
+// Schermata principale
 export default function OrdersScreen() {
     const { orders } = useOrders();
+
+    // Hook per eseguire un'azione quando la schermata entra in focus
+    useFocusEffect(
+        useCallback(() => {
+            // In un'app reale, qui faresti una chiamata API per ricaricare gli ordini
+            console.log("Schermata Ordini in focus: ricarico i dati...");
+            // Ad esempio: fetchOrders();
+        }, [])
+    );
 
     return (
         <View style={GlobalStyles.container}>
@@ -83,9 +82,7 @@ export default function OrdersScreen() {
     );
 }
 
-// ====================================================================
-// Stili della schermata
-// ====================================================================
+// Stili
 const styles = StyleSheet.create({
     list: {
         width: '100%',
@@ -95,10 +92,8 @@ const styles = StyleSheet.create({
         padding: 16,
         borderRadius: 12,
         marginBottom: 16,
-        borderWidth: 1,
-        borderColor: '#eee',
-        elevation: 2, // Ombra per Android
-        shadowColor: '#000', // Ombra per iOS
+        elevation: 2,
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
         shadowRadius: 2,
@@ -111,29 +106,11 @@ const styles = StyleSheet.create({
         paddingBottom: 8,
         marginBottom: 8,
     },
-    orderId: {
-        fontWeight: 'bold',
-        fontSize: 16,
-        color: '#2A2A2A',
-    },
-    orderDate: {
-        color: '#666',
-        fontSize: 14,
-    },
-    itemContainer: {
-        flexDirection: 'row',
-        justifyContent: 'space-between',
-        paddingVertical: 4,
-    },
-    itemName: {
-        fontSize: 16,
-        color: '#444',
-    },
-    itemPrice: {
-        fontSize: 16,
-        color: '#444',
-        fontWeight: '500',
-    },
+    orderId: { fontWeight: 'bold', fontSize: 16, color: '#2A2A2A' },
+    orderDate: { color: '#666', fontSize: 14 },
+    itemContainer: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 4 },
+    itemName: { fontSize: 16, color: '#444' },
+    itemPrice: { fontSize: 16, color: '#444', fontWeight: '500' },
     totalContainer: {
         flexDirection: 'row',
         justifyContent: 'space-between',
@@ -143,14 +120,6 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: '#f0f0f0',
     },
-    totalText: {
-        fontSize: 18,
-        fontWeight: 'bold',
-        color: '#2A2A2A',
-    },
-    payButton: {
-        ...GlobalStyles.button,
-        paddingVertical: 8,
-        paddingHorizontal: 24,
-    },
+    totalText: { fontSize: 18, fontWeight: 'bold', color: '#2A2A2A' },
+    payButton: { ...GlobalStyles.button, paddingVertical: 8, paddingHorizontal: 24 },
 });
