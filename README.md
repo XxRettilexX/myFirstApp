@@ -1,4 +1,4 @@
-# 🍕 Pizzeria ITS - La Tua Prima App in React Native
+# 🍕 Bella Pizza - App di Esercitazione in React Native
 
 Benvenuto nel progetto **Pizzeria ITS**! Questa è un'applicazione mobile creata come esercitazione per il corso ITS, focalizzata sull'apprendimento dei concetti fondamentali di React Native e della navigazione mobile.
 
