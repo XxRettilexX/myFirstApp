@@ -2,9 +2,9 @@
 
 import React, { createContext, ReactNode, useContext, useState } from 'react';
 import { useAuth } from './AuthContext';
-import { Order } from './OrderContext';
+import { Order } from './OrderContext'; // Riusiamo la definizione di Ordine
 
-// 👇 Esportiamo l'interfaccia
+// 👇 ESPORTA L'INTERFACCIA PER RENDERLA ACCESSIBILE AD ALTRI FILE
 export interface UserProfile {
     points: number;
     orderHistory: Order[];
@@ -13,7 +13,7 @@ export interface UserProfile {
 interface ProfileContextType {
     profile: UserProfile;
     addPaidOrder: (order: Order) => void;
-    clearProfile: () => void; // 👈 Aggiungiamo la funzione al tipo
+    clearProfile: () => void; // 👈 AGGIUNGI LA FUNZIONE MANCANTE AL TIPO
 }
 
 const ProfileContext = createContext<ProfileContextType | undefined>(undefined);

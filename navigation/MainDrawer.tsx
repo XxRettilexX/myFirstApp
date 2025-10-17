@@ -101,7 +101,7 @@ export default function MainDrawerNavigator() {
             />
             <Drawer.Screen
                 name="Profile"
-                component={ProfileScreen}
+                component={ProfileScreen as unknown as React.ComponentType<any>}
                 options={{ title: 'Il Mio Profilo' }}
             />
         </Drawer.Navigator>
