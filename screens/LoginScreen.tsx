@@ -1,8 +1,9 @@
+import { CommonActions } from '@react-navigation/native';
 import { NativeStackScreenProps } from '@react-navigation/native-stack';
 import React, { useState } from 'react';
 import { Alert, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
 import { GlobalStyles } from '../constants/theme';
-import { useAuth } from '../context/AuthContext'; // 👈 Importa l'hook di autenticazione
+import { useAuth } from '../context/AuthContext';
 import { RootStackParamList } from '../navigation/RootStack';
 
 type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
@@ -10,17 +11,24 @@ type Props = NativeStackScreenProps<RootStackParamList, 'Login'>;
 export default function LoginScreen({ navigation }: Props) {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
-    const { login } = useAuth(); // 👈 Ottieni la funzione di login
+    const { login } = useAuth();
 
-    const handleLogin = () => {
+    const handleLogin = async () => {
         if (!email || !password) {
             Alert.alert('Errore', 'Inserisci email e password.');
             return;
         }
-        // 1. Esegui il login (aggiorna lo stato globale)
-        login();
-        // 2. Torna alla schermata precedente (il Profilo)
-        navigation.goBack();
+
+        await login(email, password);
+
+        // *** PARTE CRITICA: RESET DELLO STACK DI NAVIGAZIONE (Slide 248) ***
+        // Sostituisce lo stack con MainDrawer per impedire di tornare a Login
+        navigation.dispatch(
+            CommonActions.reset({
+                index: 0,
+                routes: [{ name: 'MainDrawer' }], // 'MainDrawer' è la rotta principale in RootStack
+            })
+        );
     };
 
     return (

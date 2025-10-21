@@ -5,16 +5,17 @@ import React from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GlobalStyles } from '../constants/theme';
 import { CartItem, useCart } from '../context/CartContext';
-import { useOrders } from '../context/OrderContext'; // 👈 Importa l'hook degli ordini
+import { useOrders } from '../context/OrderContext';
 
 export default function CartScreen() {
-    const { items, clearCart } = useCart();
+    // Prende total dal contesto (come se fosse un selector)
+    const { items, clearCart, total } = useCart();
     const { addOrder } = useOrders();
     const navigation = useNavigation();
 
-    const total = items.reduce((sum, item) => sum + item.price * item.quantity, 0);
-
     const handlePlaceOrder = () => {
+        if (items.length === 0) return;
+
         // 1. Aggiungi l'ordine al contesto degli ordini
         addOrder(items, total);
         // 2. Svuota il carrello
@@ -46,12 +47,12 @@ export default function CartScreen() {
                         renderItem={renderItem}
                         keyExtractor={(item) => item.id}
                         style={styles.list}
+                        contentContainerStyle={{ paddingHorizontal: 10 }}
                     />
                     <View style={styles.totalContainer}>
                         <Text style={styles.totalText}>Totale:</Text>
                         <Text style={styles.totalPrice}>€ {total.toFixed(2)}</Text>
                     </View>
-                    {/* 👇 AGGIUNGI IL PULSANTE PER EFFETTUARE L'ORDINE */}
                     <Pressable style={GlobalStyles.button} onPress={handlePlaceOrder}>
                         <Text style={GlobalStyles.buttonText}>Ordina Ora</Text>
                     </Pressable>
@@ -61,13 +62,27 @@ export default function CartScreen() {
     );
 }
 
-// ... (gli stili rimangono gli stessi)
 const styles = StyleSheet.create({
-    list: { width: '100%' },
-    itemContainer: { flexDirection: 'row', justifyContent: 'space-between', paddingVertical: 12, borderBottomWidth: 1, borderBottomColor: '#ccc' },
+    list: { width: '100%', flexGrow: 0 },
+    itemContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        paddingVertical: 12,
+        borderBottomWidth: 1,
+        borderBottomColor: '#ccc'
+    },
     itemName: { fontSize: 18, color: '#2A2A2A' },
     itemPrice: { fontSize: 18, fontWeight: 'bold', color: '#2A2A2A' },
-    totalContainer: { flexDirection: 'row', justifyContent: 'space-between', width: '100%', marginTop: 20, paddingTop: 10, borderTopWidth: 2, borderTopColor: '#333' },
+    totalContainer: {
+        flexDirection: 'row',
+        justifyContent: 'space-between',
+        width: '100%',
+        marginTop: 20,
+        paddingTop: 10,
+        borderTopWidth: 2,
+        borderTopColor: '#333',
+        paddingHorizontal: 10,
+    },
     totalText: { fontSize: 22, fontWeight: 'bold', color: '#2A2A2A' },
     totalPrice: { fontSize: 22, fontWeight: 'bold', color: '#FF6347' },
 });

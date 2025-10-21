@@ -36,13 +36,27 @@ export const GlobalStyles = StyleSheet.create({
     padding: 24,
     gap: 20,
   },
+  // Nuovo: Contenitore scrollabile (da usare per ScrollView in Home/Settings)
+  scrollContainer: {
+    flexGrow: 1,
+    padding: 24,
+    backgroundColor: Colors.light.background,
+    alignItems: 'center',
+    paddingTop: 40, // Aggiunto spazio superiore per coerenza grafica
+  },
+  // Nuovo: Contenitore per liste/card (in Home)
+  listContainer: {
+    width: '100%',
+    paddingHorizontal: 0,
+    marginTop: 10,
+  },
   // Stile per i titoli principali delle schermate
   title: {
     fontSize: 32,
     fontWeight: 'bold',
     color: Colors.light.text,
     textAlign: 'center',
-    marginBottom: 10,
+    marginBottom: 30, // Aumentato lo spazio
   },
   // Stile per il testo generico
   text: {

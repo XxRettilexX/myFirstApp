@@ -1,28 +1,22 @@
 // screens/HomeScreen.tsx
 
 import React from 'react';
-import { Pressable, ScrollView, Text } from 'react-native';
+import { ScrollView, Text, View } from 'react-native';
+import { PizzaCard } from '../components/PizzaCard'; // 👈 Corretto: importato correttamente
 import { GlobalStyles } from '../constants/theme';
 import { PIZZAS } from '../data/pizzas';
-import { HomeScreenProps } from '../navigation/MainDrawer'; // 👈 Importa le props corrette
+import { HomeScreenProps } from '../navigation/MainDrawer';
 
 export default function HomeScreen({ navigation }: HomeScreenProps) {
     return (
-        <ScrollView contentContainerStyle={GlobalStyles.container}>
+        <ScrollView contentContainerStyle={GlobalStyles.scrollContainer}>
             <Text style={GlobalStyles.title}>Il Nostro Menù</Text>
-
-            {PIZZAS.map((pizza) => (
-                <Pressable
-                    key={pizza.id}
-                    style={GlobalStyles.button}
-                    onPress={() =>
-                        // La navigazione a PizzaDetails funziona perché è nello stack genitore
-                        navigation.navigate('PizzaDetails', { id: pizza.id, name: pizza.name })
-                    }
-                >
-                    <Text style={GlobalStyles.buttonText}>{pizza.name}</Text>
-                </Pressable>
-            ))}
+            <View style={GlobalStyles.listContainer}>
+                {PIZZAS.map((pizza) => (
+                    // Utilizzo corretto del componente
+                    <PizzaCard key={pizza.id} pizza={pizza} />
+                ))}
+            </View>
         </ScrollView>
     );
 }

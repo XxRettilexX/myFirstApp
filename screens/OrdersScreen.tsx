@@ -1,6 +1,6 @@
 // screens/OrdersScreen.tsx
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { Alert, FlatList, Pressable, StyleSheet, Text, View } from 'react-native';
 import { GlobalStyles } from '../constants/theme';
 import { useAuth } from '../context/AuthContext';
@@ -8,29 +8,9 @@ import { Order, useOrders } from '../context/OrderContext';
 import { useProfile } from '../context/ProfileContext';
 
 // ====================================================================
-// Componente Card per un singolo ordine da pagare
+// Componente Card per un singolo ordine da pagare (Solo visualizzazione)
 // ====================================================================
 const OrderCard = ({ order }: { order: Order }) => {
-    // Otteniamo le funzioni dai contesti che ci servono
-    const { removeOrder } = useOrders();
-    const { addPaidOrder } = useProfile();
-    const { isLoggedIn } = useAuth();
-
-    const handlePayment = () => {
-        // 1. Sposta l'ordine nello storico del profilo (se loggato, accumulerà punti)
-        addPaidOrder(order);
-
-        // 2. Rimuovi l'ordine dalla lista di quelli "da pagare"
-        removeOrder(order.id);
-
-        // 3. Mostra una conferma di pagamento con un messaggio dinamico
-        const pointsEarned = Math.floor(order.total);
-        const confirmationMessage = isLoggedIn
-            ? `Grazie! Hai guadagnato ${pointsEarned} punti fedeltà.`
-            : `Grazie per il tuo ordine! Accedi al tuo profilo per accumulare punti in futuro.`;
-
-        Alert.alert("Pagamento Effettuato", confirmationMessage);
-    };
 
     return (
         <View style={styles.orderContainer}>
@@ -48,37 +28,87 @@ const OrderCard = ({ order }: { order: Order }) => {
                 </View>
             ))}
 
-            {/* Riepilogo finale con totale e pulsante Paga */}
-            <View style={styles.totalContainer}>
-                <Text style={styles.totalText}>Totale: €{order.total.toFixed(2)}</Text>
-                <Pressable style={styles.payButton} onPress={handlePayment}>
-                    <Text style={GlobalStyles.buttonText}>Paga Ora</Text>
-                </Pressable>
+            {/* Riepilogo finale con totale */}
+            <View style={[styles.totalContainer, { borderTopWidth: 0, marginTop: 4, paddingTop: 4 }]}>
+                <Text style={styles.totalText}>Totale Ordine: </Text>
+                <Text style={styles.totalPrice}>€{order.total.toFixed(2)}</Text>
             </View>
         </View>
     );
 };
 
 // ====================================================================
-// Schermata principale che mostra la lista degli ordini in sospeso
+// Schermata principale con funzione PAGA TUTTO (All You Can Eat)
 // ====================================================================
 export default function OrdersScreen() {
-    const { orders } = useOrders();
+    const { orders, removeOrder } = useOrders();
+    const { addPaidOrder } = useProfile();
+    const { isLoggedIn } = useAuth();
+
+    // Calcola il totale complessivo di tutti gli ordini in sospeso
+    const grandTotal = useMemo(() => {
+        return orders.reduce((sum, order) => sum + order.total, 0);
+    }, [orders]);
+
+    const handlePayAll = () => {
+        if (orders.length === 0) return;
+
+        const ordersCount = orders.length;
+        const totalAmount = grandTotal;
+        let totalPointsEarned = 0;
+
+        // Elabora tutti gli ordini e rimuovili
+        // Creiamo una copia per iterare mentre mutiamo l'array originale (tramite removeOrder)
+        const ordersToProcess = [...orders];
+
+        ordersToProcess.forEach(order => {
+            if (isLoggedIn) {
+                // Sposta l'ordine nello storico del profilo e calcola i punti
+                addPaidOrder(order);
+                totalPointsEarned += Math.floor(order.total);
+            }
+            // Rimuovi l'ordine dalla lista
+            removeOrder(order.id);
+        });
+
+        // Messaggio di conferma generale
+        const confirmationMessage = isLoggedIn
+            ? `Grazie per aver pagato ${ordersCount} ordini! Totale: €${totalAmount.toFixed(2)}. Hai guadagnato ${totalPointsEarned} punti fedeltà.`
+            : `Grazie per aver pagato ${ordersCount} ordini! Totale: €${totalAmount.toFixed(2)}. Accedi per accumulare punti.`;
+
+        Alert.alert("Pagamento Complessivo Effettuato!", confirmationMessage);
+    };
+
 
     return (
-        <View style={GlobalStyles.container}>
+        <View style={[GlobalStyles.container, { justifyContent: 'flex-start', paddingHorizontal: 0 }]}>
             <Text style={GlobalStyles.title}>Ordini da Pagare</Text>
 
             {orders.length === 0 ? (
                 <Text style={GlobalStyles.text}>Non hai ordini in sospeso al momento.</Text>
             ) : (
-                <FlatList
-                    data={orders}
-                    renderItem={({ item }) => <OrderCard order={item} />}
-                    keyExtractor={(item) => item.id}
-                    style={styles.list}
-                    contentContainerStyle={{ paddingTop: 10, paddingBottom: 20 }}
-                />
+                <>
+                    <FlatList
+                        data={orders}
+                        renderItem={({ item }) => <OrderCard order={item} />}
+                        keyExtractor={(item) => item.id}
+                        style={styles.list}
+                        contentContainerStyle={GlobalStyles.listContainer}
+                    />
+
+                    {/* Contenitore per il pulsante Paga Tutto */}
+                    <View style={styles.payAllContainer}>
+                        <Text style={styles.payAllText}>Totale Complessivo:</Text>
+                        <Text style={styles.payAllPrice}>€ {grandTotal.toFixed(2)}</Text>
+                        <Pressable
+                            style={styles.payAllButton}
+                            onPress={handlePayAll}
+                            disabled={grandTotal === 0}
+                        >
+                            <Text style={GlobalStyles.buttonText}>Paga Tutto ({orders.length} ordini)</Text>
+                        </Pressable>
+                    </View>
+                </>
             )}
         </View>
     );
@@ -90,6 +120,7 @@ export default function OrdersScreen() {
 const styles = StyleSheet.create({
     list: {
         width: '100%',
+        flexGrow: 1,
     },
     orderContainer: {
         backgroundColor: 'white',
@@ -98,8 +129,8 @@ const styles = StyleSheet.create({
         marginBottom: 16,
         borderWidth: 1,
         borderColor: '#eee',
-        elevation: 2, // Ombra per Android
-        shadowColor: '#000', // Ombra per iOS
+        elevation: 2,
+        shadowColor: '#000',
         shadowOffset: { width: 0, height: 1 },
         shadowOpacity: 0.1,
         shadowRadius: 2,
@@ -149,9 +180,33 @@ const styles = StyleSheet.create({
         fontWeight: 'bold',
         color: '#2A2A2A',
     },
-    payButton: {
-        ...GlobalStyles.button,
-        paddingVertical: 8,
-        paddingHorizontal: 24,
+    totalPrice: {
+        fontSize: 18,
+        fontWeight: 'bold',
+        color: '#FF6347',
     },
+    // Nuovi stili per il pulsante Paga Tutto
+    payAllContainer: {
+        width: '100%',
+        padding: 24,
+        backgroundColor: 'white',
+        alignItems: 'center',
+        borderTopWidth: 2,
+        borderTopColor: '#FF6347',
+    },
+    payAllText: {
+        fontSize: 18,
+        color: '#2A2A2A',
+        marginBottom: 4,
+    },
+    payAllPrice: {
+        fontSize: 30,
+        fontWeight: 'bold',
+        color: '#FF6347',
+        marginBottom: 16,
+    },
+    payAllButton: {
+        ...GlobalStyles.button,
+        minWidth: '90%',
+    }
 });
