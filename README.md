@@ -1,6 +1,6 @@
 # 🍕 Bella Pizza - App di Esercitazione in React Native
 
-Benvenuto nel progetto **Pizzeria ITS**! Questa è un'applicazione mobile creata come esercitazione per il corso ITS, focalizzata sull'apprendimento dei concetti fondamentali di React Native e della navigazione mobile.
+Bella Pizza è un'applicazione mobile sviluppata in React Native con Expo a scopo didattico (ITS). L'obiettivo è simulare in modo completo e sicuro il flusso utente di una moderna pizzeria digitale, dalla navigazione all'autenticazione, fino alla gestione di menu e ordini.
 
 ![React Native Logo](https://raw.githubusercontent.com/xxrettilexx/myfirstapp/main/assets/images/react-logo.png)
 
@@ -10,8 +10,13 @@ Benvenuto nel progetto **Pizzeria ITS**! Questa è un'applicazione mobile creata
 
 L'applicazione simula un flusso utente semplice ma completo per una pizzeria:
 
--   👤 **Flusso di Autenticazione**: Una schermata di `Login` che protegge l'accesso all'area principale dell'app.
--   📚 **Navigazione a Stack**: Gestisce la navigazione gerarchica tra le schermate, ad esempio dalla lista prodotti al dettaglio.
+-   👤 **Autenticazione Sicura**: Una schermata di `Login` che protegge l'accesso all'area principale dell'app.
+-   🛤️ **Navigazione Ibrida**: Utilizzo di navigazione Stack (per flussi gerarchici come Prodotti → Dettaglio) e Tab Bar (per le sezioni principali).
+-   🚀 **Navigazione Veloce**: La Tab Bar inferiore permette di spostarsi rapidamente tra Home (Menu), Ordini e Profilo.
+-   💳 **Pagamento**: Funzione "Paga Tutto" per saldare tutti gli ordini in sospeso.
+-   📜 **Cronologia Ordini**: Visualizzazione dello storico degli ordini pagati.
+-   ⭐ **Punti Fedeltà**: Accumulo di punti fedeltà ad ogni ordine pagato.
+-   🔧 **Impostazioni**: Schermata per personalizzare l'aspetto dell'app (tema e dimensione del testo).
 -   📱 **Navigazione a Schede (Tabs)**: Una `Bottom Tab Bar` per muoversi tra le sezioni principali: `Home`, `Ordini` e `Profilo`.
 -   ➡️ **Passaggio di Parametri**: Abilità di inviare dati da una schermata all'altra (es. ID e nome della pizza).
 -   🔐 **Gestione della Sessione**: Utilizzo del `reset` dello stack di navigazione per un'esperienza di login/logout sicura e senza interruzioni.
@@ -20,110 +25,53 @@ L'applicazione simula un flusso utente semplice ma completo per una pizzeria:
 
 ## 🛠️ Architettura e Concetti Chiave
 
-Il progetto è stato costruito seguendo fedelmente le lezioni del corso, in particolare l'architettura manuale di **React Navigation** come spiegato nelle slide del "Giorno 3".
+L'app adotta un'architettura di navigazione a navigatori annidati gestita da React Navigation, incapsulata nel NavigationContainer radice.
 
 ### Struttura della Navigazione
 
 L'app è avvolta da un `NavigationContainer` che gestisce due navigatori principali annidati:
 
-1.  **`RootStack` (StackNavigator)**: Gestisce il flusso principale.
-    -   `Login`: Schermata iniziale.
-    -   `MainTabs`: Un'unica schermata che contiene al suo interno il Tab Navigator.
-    -   `PizzaDetails`: Schermata di dettaglio accessibile dall'app.
+1.  **`RootStack` (StackNavigator)**: Il navigatore principale, responsabile della gestione dei flussi critici:
 
-    ```tsx
-    // navigation/RootStack.tsx
-    export type RootStackParamList = {
-      Login: undefined;
-      MainTabs: undefined;
-      PizzaDetails: { id: string; name: string };
-    };
+    -   Login (la porta d'accesso).
+    -   MainTabs (l'area principale).
+    -   PizzaDetails (schermata di dettaglio con parametri).
 
-    const Stack = createNativeStackNavigator<RootStackParamList>();
-
-    export default function RootStack() {
-      return (
-        <Stack.Navigator>
-          <Stack.Screen name="Login" component={LoginScreen} options={{ headerShown: false }} />
-          <Stack.Screen name="MainTabs" component={MainTabs} options={{ headerShown: false }} />
-          <Stack.Screen name="PizzaDetails" component={PizzaDetailsScreen} />
-        </Stack.Navigator>
-      );
-    }
-    ```
-
-2.  **`MainTabs` (TabNavigator)**: Gestisce le schede principali.
+2.  **`MainTabs` (Bottom Tab Navigator)**: Il navigatore annidato che gestisce le tre sezioni principali dell'utente autenticato:
     -   `Home`: Mostra il menu.
+    -   `Cart`: Mostra il carrello.
     -   `Orders`: Mostra gli ordini.
-    -   `Profile`: Contiene il pulsante di logout.
+    -   `Profile`: Contiene il pulsante di logout e la cronologia ordini e la sezione impostazioni.
 
-    ```tsx
-    // navigation/MainTabs.tsx
-    const Tab = createBottomTabNavigator<TabsParamList>();
+### Gestione dello Stato (Context API)
 
-    export default function MainTabs() {
-      return (
-        <Tab.Navigator /* ... */ >
-          <Tab.Screen name="Home" component={HomeScreen} />
-          <Tab.Screen name="Orders" component={OrdersScreen} />
-          <Tab.Screen name="Profile" component={ProfileScreen} />
-        </Tab.Navigator>
-      );
-    }
-    ```
+L'applicazione utilizza l'API Context di React per la gestione dello stato globale, suddiviso in contesti specifici:
 
-### Gestione del Flusso di Login/Logout
-
-Per garantire che l'utente non possa tornare alla schermata di login dopo essersi autenticato (e viceversa), utilizziamo l'azione `reset` della navigazione.
-
-```tsx
-// screens/LoginScreen.tsx -> Al login
-navigation.reset({
-  index: 0,
-  routes: [{ name: 'MainTabs' }],
-});
-
-// screens/ProfileScreen.tsx -> Al logout
-navigation.dispatch(
-  CommonActions.reset({
-    index: 0,
-    routes: [{ name: 'Login' }],
-  })
-);
-```
+-   `AuthContext`: Gestisce l'autenticazione dell'utente e la persistenza della sessione.
+-   `CartContext`: Gestisce gli elementi nel carrello.
+-   `OrderContext`: Gestisce gli ordini in sospeso.
+-   `ProfileContext`: Gestisce il profilo dell'utente, inclusi i punti fedeltà e la cronologia degli ordini.
+-   `SettingsContext`: Gestisce le impostazioni dell'app, come tema e dimensione del testo.
 
 ---
 
-## 🚀 Come Avviare il Progetto
+## ✅ Best Practice
 
-Segui questi passaggi per eseguire l'app in locale.
+-   **Separazione dei Concetti**: Il codice è organizzato in cartelle specifiche per `screens`, `components`, `navigation`, `context`, `hooks`, `constants` e `data`.
+-   **Componenti Riutilizzabili**: Creazione di componenti generici come `PizzaCard`, `RadioButton` e `Collapsible` per mantenere il codice DRY (Don't Repeat Yourself).
+-   **Stili Globali**: Utilizzo di un file `theme.ts` per definire stili globali e colori, garantendo coerenza visiva.
+-   **Context API per lo Stato Globale**: Suddivisione dello stato in contesti specifici per una migliore manutenibilità.
+-   **TypeScript**: Utilizzo di TypeScript per una maggiore sicurezza del tipo e un migliore autocompletamento.
+-   **Navigazione Tipizzata**: I navigatori e le rotte sono tipizzati per evitare errori di navigazione.
 
-1.  **Clona il Repository**
-    ```bash
-    git clone [https://github.com/XxRettilexX/myFirstApp.git](https://github.com/XxRettilexX/myFirstApp.git)
-    cd myfirstapp
-    ```
+## ❌ Bad Practice
 
-2.  **Installa le Dipendenze**
-    Assicurati di avere Node.js installato, poi esegui:
-    ```bash
-    npm install
-    ```
-
-3.  **Avvia Expo**
-    ```bash
-    npx expo start
-    ```
-    -   Scansiona il QR code con l'app **Expo Go** sul tuo smartphone (iOS o Android).
-    -   Oppure, premi `a` per aprire in un emulatore Android o `i` per un simulatore iOS.
+-   **Stili Inline**: Evitare di utilizzare stili inline direttamente nei componenti. Preferire l'uso di `StyleSheet.create` o stili globali.
+-   **Logica di Business nelle Schermate**: La logica di business complessa dovrebbe essere estratta in custom hooks o servizi, non lasciata direttamente nei componenti delle schermate.
+-   **Stato Monolitico**: Evitare di creare un unico grande contesto per l'intera applicazione. Suddividere lo stato in contesti più piccoli e specifici.
+-   **Mancanza di Gestione degli Errori**: Implementare una gestione degli errori più robusta, ad esempio per le chiamate di rete o le operazioni di storage.
+-   **Componenti Troppo Grandi**: Suddividere i componenti complessi in componenti più piccoli e gestibili.
 
 ---
 
-## 💻 Stack Tecnologico
 
--   **Framework**: React Native con Expo
--   **Linguaggio**: TypeScript
--   **Navigazione**: React Navigation (`@react-navigation/native-stack`, `@react-navigation/bottom-tabs`)
--   **Icone**: `@expo/vector-icons`
-
-Fatto con ❤️ durante il corso ITS.
